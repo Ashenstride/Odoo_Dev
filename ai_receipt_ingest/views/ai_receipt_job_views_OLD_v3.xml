@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ai_receipt_job_list" model="ir.ui.view">
+        <field name="name">ai.receipt.job.list</field>
+        <field name="model">ai.receipt.job</field>
+        <field name="arch" type="xml">
+            <list string="Receipt Jobs">
+                <field name="name"/>
+                <field name="file_name"/>
+                <field name="partner_id"/>
+                <field name="invoice_date"/>
+                <field name="total_amount"/>
+                <field name="currency_id"/>
+                <field name="state"/>
+                <field name="document_type" optional="show"/>
+                <field name="bill_state" string="Bill State" optional="show"/>
+                <field name="bill_payment_state" string="Payment Status" optional="show"/>
+                <field name="bill_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ai_receipt_job_search" model="ir.ui.view">
+        <field name="name">ai.receipt.job.search</field>
+        <field name="model">ai.receipt.job</field>
+        <field name="arch" type="xml">
+            <search string="AI Receipts">
+                <field name="name"/>
+                <field name="file_name"/>
+                <field name="partner_id"/>
+                <field name="document_type"/>
+                <field name="bill_payment_state"/>
+                <field name="bill_state"/>
+
+                <filter string="Draft Jobs" name="job_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Analyzed Jobs" name="job_analyzed" domain="[('state', '=', 'analyzed')]"/>
+                <filter string="Created Jobs" name="job_done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Due" name="payment_due" domain="[('bill_payment_state', 'in', ['not_paid', 'partial', 'in_payment'])]"/>
+                <filter string="Paid" name="payment_paid" domain="[('bill_payment_state', '=', 'paid')]"/>
+                <filter string="Posted" name="bill_posted" domain="[('bill_state', '=', 'posted')]"/>
+                <filter string="Receipts" name="doc_receipt" domain="[('document_type', '=', 'receipt')]"/>
+                <filter string="Bills" name="doc_bill" domain="[('document_type', '=', 'vendor_bill')]"/>
+                <separator/>
+                <filter string="Vendor" name="group_vendor" context="{'group_by': 'partner_id'}"/>
+                <filter string="Payment Status" name="group_payment_status" context="{'group_by': 'bill_payment_state'}"/>
+                <filter string="Bill State" name="group_bill_state" context="{'group_by': 'bill_state'}"/>
+                <filter string="Document Type" name="group_document_type" context="{'group_by': 'document_type'}"/>
+                <filter string="Job State" name="group_job_state" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_ai_receipt_job_form" model="ir.ui.view">
+        <field name="name">ai.receipt.job.form</field>
+        <field name="model">ai.receipt.job</field>
+        <field name="arch" type="xml">
+            <form string="AI Receipt Job">
+                <header>
+                    <button name="action_analyze" type="object" string="Analyze" class="btn-primary" invisible="state not in ('draft','error')"/>
+                    <button name="action_create_vendor_bill" type="object" string="Create Draft Vendor Bill" class="btn-primary" invisible="state != 'analyzed'"/>
+                    <button name="action_create_vendor_bill" type="object" string="Open Vendor Bill" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,analyzed,done,error"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="file_name"/>
+                            <field name="file_data" filename="file_name"/>
+                            <field name="mime_type" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="document_type" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="invoice_number" readonly="1"/>
+                            <field name="payment_reference" readonly="1"/>
+                            <field name="invoice_date" readonly="1"/>
+                            <field name="due_date" readonly="1"/>
+                            <field name="currency_id" readonly="1"/>
+                            <field name="subtotal_amount" readonly="1"/>
+                            <field name="tax_amount" readonly="1"/>
+                            <field name="total_amount" readonly="1"/>
+                            <field name="bill_id" readonly="1"/>
+                            <field name="bill_state" readonly="1"/>
+                            <field name="bill_payment_state" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Summary">
+                            <field name="extraction_summary" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Extracted JSON">
+                            <field name="extracted_json" nolabel="1" readonly="1" widget="text"/>
+                        </page>
+                        <page string="Errors">
+                            <field name="error_message" nolabel="1" readonly="1" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ai_receipt_job" model="ir.actions.act_window">
+        <field name="name">AI Receipts</field>
+        <field name="res_model">ai.receipt.job</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ai_receipt_job_search"/>
+    </record>
+
+    <menuitem id="menu_ai_receipt_root" name="AI Receipts" parent="account.menu_finance" sequence="120"/>
+    <menuitem id="menu_ai_receipt_jobs" name="Receipt Jobs" parent="menu_ai_receipt_root" action="action_ai_receipt_job" sequence="10"/>
+</odoo>

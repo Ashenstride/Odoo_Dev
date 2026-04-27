@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_ai_receipt" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.ai.receipt</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="AI Receipt Ingest" name="ai_receipt_ingest" groups="account.group_account_user">
+                    <block title="OpenAI Receipt Extraction">
+                        <setting string="OpenAI API Key" help="Used to extract structured bill data from uploaded receipts and invoices.">
+                            <field name="ai_receipt_openai_api_key" password="True"/>
+                        </setting>
+                        <setting string="OpenAI Model" help="Vision-capable model for receipts and PDFs.">
+                            <field name="ai_receipt_openai_model"/>
+                        </setting>
+                        <setting string="Default Expense Account" help="Fallback account used for extracted vendor bill lines.">
+                            <field name="ai_receipt_default_expense_account_id"/>
+                        </setting>
+                        <setting string="Default Purchase Journal" help="Journal used to create draft vendor bills.">
+                            <field name="ai_receipt_default_purchase_journal_id"/>
+                        </setting>
+                        <setting string="Auto-create Vendor If Missing">
+                            <field name="ai_receipt_auto_create_partner"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
